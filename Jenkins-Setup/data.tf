@@ -1,5 +1,5 @@
-
-data "aws_ami" "image_" {
+# Data source to fetch the latest Amazon Linux 2 AMI ID
+data "aws_ami" "image" {
   most_recent = true
   owners      = ["amazon"]
 
@@ -9,11 +9,14 @@ data "aws_ami" "image_" {
   }
 
   filter {
-    name   = "state"
-    values = ["available"]
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
   }
 }
 
-output "ami_id" {
-  value = data.aws_ami.image.id
-}
+
