@@ -2,49 +2,50 @@
 
 pipeline {
     agent { label 'jenkins-agent' }
-    
+
     environment {
-        NVD_API_KEY = env.NVD_API_KEY // Fetch API key from Jenkins environment
+        NVD_API_KEY = "${env.NVD_API_KEY}" // Fetch API key from Jenkins environment
     }
-    
+
     stages {
-        
-        stage("Checkout Code") {
+        stage("Checkout The Code") {
             steps {
                 script {
-                    echo "Checking out code from repository..."
-                    checkout_code("https://github.com/omkar-shelke25/travel-blog-cicd-using-jenkins", "main")
+                    checkout_code("https://github.com/omkar-shelke25/travel-blog-cicd-using-jenekins", "main")
                 }
             }
         }
         
-        stage("Security Scanning") {
+        
+        
+        stage("Trivy vulnerability scan") {
             steps {
                 script {
-                    echo "Performing security scan using Trivy..."
                     trivy_fs_scan()
                 }
             }
         }
         
-        stage("Run Tests") {
+        stage("SonarQube: Code Analysis") {
             steps {
                 script {
-                    echo "Executing test cases..."
-                    hello()
+                    sonar("Sonar", "travel-blog", "travel-blog")
+                }
+            }
+        }
+        
+        stage("SonarQube: Sonar Quality Gate") {
+            steps {
+                script {
+                    sonar_QualityGate()
                 }
             }
         }
        
-        stage("Build Application") {
+       stage("Testing") {
             steps {
                 script {
-                    echo "Checking for Dockerfile..."
-                    if (!fileExists('Dockerfile')) {
-                        error "Dockerfile not found!"
-                    }
-                    echo "Building Docker image..."
-                    docker_build("note-app")
+                    hello()
                 }
             }
         }
@@ -53,14 +54,18 @@ pipeline {
     
     post {
         always {
-            echo "Cleaning up workspace..."
-            cleanWs()
+            script {
+                node {
+                    echo 'Cleaning up workspace...'
+                    cleanWs()
+                }
+            }
         }
         success {
-            echo "Pipeline completed successfully."
+            echo 'Pipeline completed successfully.'
         }
         failure {
-            echo "Pipeline failed. Check logs for details."
+            echo 'Pipeline failed.'
         }
     }
 }
