@@ -1,12 +1,31 @@
 version: "3.8"
+
 services:
   mongodb:
     container_name: mongo-service
     image: mongo:latest
     volumes:
-      - ./backend/data:/data
+      - mongo_data:/data/db
     ports:
       - "27017:27017"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    container_name: redis-service
+    image: redis:7.0.5-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     container_name: backend
@@ -15,8 +34,12 @@ services:
       - ./backend/.env.docker
     ports:
       - "31100:8080"
+    restart: unless-stopped
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   frontend:
     container_name: frontend
@@ -25,15 +48,7 @@ services:
       - ./frontend/.env.docker
     ports:
       - "5173:5173"
-
-  redis:
-    container_name: redis-service
     restart: unless-stopped
-    image: redis:7.0.5-alpine 
-    expose:
-        - 6379
-    depends_on:
-      - mongodb
 
 volumes:
-  data:
+  mongo_data:
