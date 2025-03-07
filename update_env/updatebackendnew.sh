@@ -16,7 +16,10 @@ current_url=$(sed -n "4p" $file_to_find)
 if [[ "$current_url" != "FRONTEND_URL=\"http://${ipv4_address}:5173\"" ]]; then
     if [ -f $file_to_find ]; then
         sed -i -e "s|FRONTEND_URL.*|FRONTEND_URL=\"http://${ipv4_address}:5173\"|g" $file_to_find
+        echo -e "\e[32m✔ Successfully updated FRONTEND_URL to http://${ipv4_address}:5173\e[0m"
     else
-        echo "ERROR: File not found."
+        echo -e "\e[31m❌ ERROR: File not found.\e[0m"
     fi
+else
+    echo -e "\e[33mℹ No changes needed. FRONTEND_URL is already up to date.\e[0m"
 fi

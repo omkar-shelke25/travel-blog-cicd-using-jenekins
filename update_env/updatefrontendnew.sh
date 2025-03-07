@@ -9,14 +9,22 @@ ipv4_address=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'R
 # Path to the .env file
 file_to_find="../frontend/.env.docker"
 
-# Check the current VITE_API_PATH in the .env file
+# Check if the .env file exists
+if [ ! -f $file_to_find ]; then
+    echo -e "\e[31m❌ ERROR: File not found: $file_to_find\e[0m"
+    exit 1
+fi
+
+# Read the current file content
 current_url=$(cat $file_to_find)
 
+# Construct the expected VITE_API_PATH line
+new_url="VITE_API_PATH=\"http://${ipv4_address}:31100\""
+
 # Update the .env file if the IP address has changed
-if [[ "$current_url" != "VITE_API_PATH=\"http://${ipv4_address}:31100\"" ]]; then
-    if [ -f $file_to_find ]; then
-        sed -i -e "s|VITE_API_PATH.*|VITE_API_PATH=\"http://${ipv4_address}:31100\"|g" $file_to_find
-    else
-        echo "ERROR: File not found."
-    fi
+if [[ "$current_url" != "$new_url" ]]; then
+    sed -i -e "s|VITE_API_PATH.*|$new_url|g" $file_to_find
+    echo -e "\e[32m✔ Successfully updated VITE_API_PATH to $new_url\e[0m"
+else
+    echo -e "\e[33mℹ No changes needed. VITE_API_PATH is already up to date.\e[0m"
 fi
