@@ -63,6 +63,8 @@ Separate Docker images are built for the frontend and backend. The Docker tags p
 
 ### 11. 📤 **Docker Push Images**  
 The built Docker images are pushed to a container registry (like Docker Hub) for deployment.
+![image](https://github.com/user-attachments/assets/5625d9f7-876c-44e2-bb9b-d0f190f75ce2)
+
 
 ---
 
